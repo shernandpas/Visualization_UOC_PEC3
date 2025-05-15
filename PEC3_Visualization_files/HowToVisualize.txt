@@ -1,5 +1,0 @@
-Python to be installed
-download the content of the folder locally
-in windows with cmd go to the directory of the folder
-input "python -m http.server 8000"
-open the browser with http://localhost:8000/index.html
