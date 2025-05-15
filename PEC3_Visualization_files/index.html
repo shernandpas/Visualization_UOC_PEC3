@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hotel Reservations Grouped Bar Chart</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Reservas hoteleras en Lisboa y Algarve</h1>
+    <h2>Estrategia para aumentar la facturación</h2>
+    <p style="text-align: left;">
+      El objetivo de la visualización es definir una estrategia rentable para la empresa propietaria de los hoteles de Lisboa y Algarve,
+      de modo que puedan priorizar donde invertir el presupuesto de marketing. Por ejemplo, enfocarse a turistas de ciertos países,
+      promocionar el resort o el hotel de la ciudad, enfocarse a estancias de trabajo o estancias de ocio y otras potenciales hipótesis que los datos nos puedan hacer
+      plantearnos.
+    </p>
+
+   <div style="text-align: center; margin: 20px 0;">
+  <img src="img/Map2.png" alt="Mapa de ubicación de hoteles" style="max-width: 100%; height: auto;" />
+  </div>
+
+<p style="text-align: left;">
+      Como cualquier empresa, nuestro objetivo es generar beneficios y para ello necesitas facturar, lo que en el caso de los hoteles
+       es una cuestión del número de habitaciones reservadas y al precio al que se reservan. <br> En este caso observaremos la facturación 
+       (ADR * número de noches) en diferentes escalas temporales (anual, mensual, semanal y diaria) pudiendo explorar los datos filtrando 
+       por características como si la reserva fue cancelada, centrándonos en los países de los que recibimos la mayoría de los huéspedes 
+       (&lt;1/4000 reservas entre 2015-2017), si las reservas son de huéspedes de Portugal o internacionales y pudiendo agrupar los datos también según esas categorías.  
+    </p>
+
+<h2>Factuaración anual (Julio 2015- Agosto 2017) </h2>
+<p style="text-align: left;"> Los filtros y agrupaciones aplican para el gráficos de facturación anual </p>
+
+
+
+    <div class="controls" id="controls-main">
+      <label for="isCanceled">Is Canceled:</label>
+      <select id="isCanceled">
+        <option value="all">All</option>
+        <option value="0">Not Canceled</option>
+        <option value="1">Canceled</option>
+      </select>
+
+      <label for="mainCountry">Main Countries:</label>
+      <select id="mainCountry">
+        <option value="all">All</option>
+      </select>
+
+      <label for="groupCountry">Group Country:</label>
+      <select id="groupCountry">
+        <option value="all">All</option>
+      </select>
+
+      <label for="tipo">Hotel Type:</label>
+      <select id="tipo">
+        <option value="all">All</option>
+        <option value="City Hotel">City Hotel</option>
+        <option value="Resort Hotel">Resort Hotel</option>
+      </select>
+
+      <label for="groupBy">Group By:</label>
+      <select id="groupBy">
+        <option value="hotel">Hotel</option>
+        <option value="is_canceled">Is Canceled</option>
+        <option value="group_country">Group Country</option>
+        <option value="mainCountry">Main Country</option>
+      </select>
+    </div>
+     
+  
+    <svg id="chart"></svg>
+    <div id="legend-main"></div>
+
+    <p style="text-align: left;"> Explorando el gráfico observamos: </p>
+  <ol>
+  <li>La facturación tiende a aumentar en los diferentes años considerando que de 2015 solo tenemos valores de la segunda mitad del año y en 2017 hasta agosto, 
+    por lo que facilmente se sobrepasará al total de 2016. No obstante, si hubiese mucha temporalidad, esta afirmación podría ser incorrecta, 
+    pero lo verificamos al comparar la facturación mensual en los gráficos siguientes.</li>
+  <li>La facturación anual del hotel de Lisboa es mayor que la del resort en el Algarve y esto se cumple con y sin las reservas canceladas</li>
+  <li>El volumen de facturación no obtenida debido a cancelaciones (aunque se haya podido volver a reservar la habitación) es muy significativa,
+     en general es más de la mitadad de la facturación obtenida (reservas no canceladas) 3</li>
+  <li> El volumen de cancelaciones ha sido principalmente de huéspedes portugueses, representando estos a nivel de facturación perdida más que el 
+    resto de paises en 2015 y 2016, no en el caso de 2017 en el cual aún así representan más de un tercio del total</li>
+  <li> Cuando filtramos por not cancelled vemos que Portugal deja de ser el mayor contribuyente a la facturación y pasan a ser los clientes internacionales</li>
+</ol>
+    
+    <div id="tooltip" class="tooltip" style="opacity: 0;"></div>
+<h2>Evolución de la facturación mensual, semanal y diaria </h2>
+    <p style="text-align: left;">Ahora observamos la evolución según los días y las semanas del año, lo que nos permite identificar patrones estacionales y fechas clave para la facturación.</p>
+    
+<p style="text-align: left;"> Los filtros y agrupaciones aplican para los 3 gráficos de facturación simultaneamente, el gráfico mensual, semanal y diario </p>
+        
+    <div class="controls" id="controls-daily">
+  <label for="isCanceled2">Is Canceled:</label>
+  <select id="isCanceled2">
+    <option value="all">All</option>
+    <option value="0">Not Canceled</option>
+    <option value="1">Canceled</option>
+  </select>
+
+  <label for="mainCountry2">Main Countries:</label>
+  <select id="mainCountry2">
+    <option value="all">All</option>
+  </select>
+
+  <label for="groupCountry2">Group Country:</label>
+  <select id="groupCountry2">
+    <option value="all">All</option>
+  </select>
+
+  <label for="tipo2">Hotel Type:</label>
+  <select id="tipo2">
+    <option value="all">All</option>
+    <option value="City Hotel">City Hotel</option>
+    <option value="Resort Hotel">Resort Hotel</option>
+  </select>
+
+  <label for="groupBy2">Group By:</label>
+  <select id="groupBy2">
+    <option value="hotel">Hotel</option>
+    <option value="is_canceled">Is Canceled</option>
+    <option value="group_country">Group Country</option>
+    <option value="mainCountry">Main Country</option>
+  </select>
+</div>
+
+<h2>Evolución de la facturación mensual</h2>
+<svg id="monthly-chart"></svg>
+
+<h2>Evolución de la facturación semanal</h2>
+<svg id="weekly-chart"></svg>
+
+<h2>Evolución de la facturación diaria</h2>
+<svg id="daily-chart"></svg>
+
+<p style="text-align: left;"> Explorando los gráfico observamos: </p>
+  <ol>
+  <li>Existe un patrón temporal en cuanto a la facturación. Se observa una onda con su pico en los meses de Julio y Agosto y los mínimos entre Noviembre y Febrero.</li>
+  <li>En los meses de Julio y Agosto, la facturación del resort del Algarve supera a la del hotel de Lisboa</li>
+  <li>La distribución de las cancelaciones sigue la tendencia de mayor número de cancelaciones a mayor número de reservas. No encontramos meses que destaquen</li>
+  <li> El aumento de facturación de 2016 a 2017 se debe principalmente a reservas de clientes interpnacionales (fuera de portugal). Se observa mejor en el gráfico mensual </li>
+  <li> Los principales paises que contribuyen a la facturación son Great Britain (GBR) y Francia (FRA) por ese orden, seguido de Alemania (DEU), España (ESP) e Irlanda (IRL). </li>
+  <li>A nivel de semanas y días que destacan tenemos que destaca el 30 de diciembre en el resort del algarve, el 25 de septeimbre de 2015 hubo un pico 
+    que no se repite en lisboa (había eventos Festival MOTELx pero no podemos definirlo como causa directa) </li>
+
+</ol>
+   
+
+
+
+<h2>Relación entre ADR y ocupación</h2>
+<p style="text-align: left;"> Una vez vistos los patrones de facturación, analicemos la distribución de sus variables contributivas, es decir el precio (ADR) y 
+  la ocupación (número de reservas). <br> Bajo la hipótesis del equilibrio entre oferta y demanda, en el cual bajando el precio aumenta la demanda y a la inversa,
+  podemos explorar si hay oportunidades con épocas de muy baja ocupación que podriamos estudiar bajar el precio para 
+  aumentar la demanda, o fechas con muy alta ocupación que se podría llegar a aumentar aún más el precio, resultando en aumento de la facturación. </p>
+
+<h2>ADR medio y ocupación por semana del calendario</h2>
+<p style="text-align: left;">Este gráfico muestra cada semana como una burbuja, donde el eje Y representa el ADR medio, el eje x la fecha (semana del año)
+   y el tamaño de la brubuja indica la ocupación (número de reservas).</p>
+
+
+
+
+
+
+<div class="controls" id="controls-bubble">
+  <label for="isCanceled6">Is Canceled:</label>
+  <select id="isCanceled6">
+    <option value="all">All</option>
+    <option value="0">Not Canceled</option>
+    <option value="1">Canceled</option>
+  </select>
+
+  <label for="mainCountry6">Main Countries:</label>
+  <select id="mainCountry6">
+    <option value="all">All</option>
+  </select>
+
+  <label for="groupCountry6">Group Country:</label>
+  <select id="groupCountry6">
+    <option value="all">All</option>
+  </select>
+
+  <label for="hotel6">Hotel Type:</label>
+  <select id="hotel6">
+    <option value="all">All</option>
+    <option value="City Hotel">City Hotel</option>
+    <option value="Resort Hotel">Resort Hotel</option>
+  </select>
+</div>
+
+<svg id="bubble-chart-week"></svg>
+
+
+<h2>Mapa de calor por semana del calendario</h2>
+<p>Esta visualización muestra la media de reservas semanales por mes, calculada a partir de los datos de varios años.</p>
+
+
+<div class="controls" id="controls-calendar">
+  <label for="isCanceled4">Is Canceled:</label>
+  <select id="isCanceled4">
+    <option value="all">All</option>
+    <option value="0">Not Canceled</option>
+    <option value="1">Canceled</option>
+  </select>
+
+  <label for="mainCountry4">Main Countries:</label>
+  <select id="mainCountry4">
+    <option value="all">All</option>
+  </select>
+
+  <label for="tipo4">Hotel Type:</label>
+  <select id="tipo4">
+    <option value="all">All</option>
+    <option value="City Hotel">City Hotel</option>
+    <option value="Resort Hotel">Resort Hotel</option>
+  </select>
+</div>
+
+<svg id="calendar-heatmap"></svg>
+
+<p style="text-align: left;"> Es interesante observar como cmabia la distribución en 2017 al eliminar los casos cancelados, de modo que 
+  tenemos más variación de ADR medio entre semanas, llevando tanto a mayores como menores ADRs. 
+  cambia para  en los cuales hacen que el ADR medio aumente. <br>
+  Observamos que ADR altos no necesariamente bajan el número de reservas, es más ADR altos se agrupan al rededor de los meses de verano donde 
+  tenemos los colores más itensos. <br>
+ El ADR más bajo se situa en temporadas de baja ocupación a exceptción del principio de 2015. </br>
+También vemos que la variación de precios es mucho más clara en el resort del Algarve que en Lisboa dodne son más estables. <br>
+En el algarve destaca el fin de año, la semana 53 con precios más elevados que las semans cercanas y con una ocupación ligeramente superior a pesar del aumento de precio,
+también destaca la semana 34 con el pico de precio, aunque no poe ello la que tiene mayor ocupación</br>
+
+  No se observa un caso claro con poca ocupación y alto ADR ni a la inversa. Por este motivo nos replanteamos la influencia del 
+  precio en el número de reservas es realmente significativa. Observaremos un histograma y su distribución. En caso de que fuera muy significativa, deberiamos
+  ver una distribución sesgada, donde la zona iquierda fuera mayor que la derecha, si por contra hay otros elementos que tienen más peso, como las fechas, esta 
+  distribución podría tener otra forma. No obstante, aunque una bajada de precio pueda no necesariamente aumentar la ocupación, una subida si que podría potencialmente disminuirla
+
+</p>
+
+
+<h2>Distribución del ADR y reservas</h2>
+<p>Este histograma muestra cómo se distribuyen los precios medios por noche (ADR) y cuántas reservas se realizaron en cada rango.</p>
+
+<div class="controls" id="controls-histogram">
+  <label for="isCanceled5">Is Canceled:</label>
+  <select id="isCanceled5">
+    <option value="all">All</option>
+    <option value="0">Not Canceled</option>
+    <option value="1">Canceled</option>
+  </select>
+
+  <label for="mainCountry5">Main Countries:</label>
+  <select id="mainCountry5">
+    <option value="all">All</option>
+  </select>
+
+  <label for="groupCountry5">Group Country:</label>
+  <select id="groupCountry5">
+    <option value="all">All</option>
+  </select>
+
+  <label for="hotel5">Hotel Type:</label>
+  <select id="hotel5">
+    <option value="all">All</option>
+    <option value="City Hotel">City Hotel</option>
+    <option value="Resort Hotel">Resort Hotel</option>
+  </select>
+</div>
+
+<svg id="adr-histogram"></svg>
+
+
+
+<p style="text-align: left;"> No podemos afirmar que bajar el precio va a subir significativamente la demanda aunque se baje por debajo de 60€ aunque 
+  si vemos que si el precio es mayor a 100 las reservas empiezan a ser menores y por encima de 140€ caen signficativamente. <br>
+  El pico de reservas se da en el rango de 60 a 120, por lo que el rango dentro del cual podríamos jugar con el precio sin experar una gran bajada de demanda<br>
+  No obstante bajarlo más de 60 o incluso 40€ podría no tener un claro impacto positivo en la demanda.
+
+</p>
+
+
+
+<p style="text-align: left;"> Una vez valoradas las fechas claves y el trade-off entre demanda y oferta, vamos a analizar quien es nuestro tipo de cliente objetivo con
+  del que queremos aumentar sus reservas. Nuestro cliente ideal, no cancela y está dispuesto a pagar un ADR alto. Ahora bien, ¿qué nacionalidad tiene ese cliente?  
+  y ¿qué tipo de viaje hace?, ¿tiende a viajar en ciertos periodos en los cuales deberiamos enfocarnos para promocionar? </p>
+
+
+
+<h2>Distribución del ADR por país</h2>
+<p style="text-align: left;">Este gráfico muestra cómo se distribuye el precio medio por noche (ADR) según el país del cliente.</p>
+
+<div class="controls" id="controls-violin">
+  <label for="isCanceled7">Is Canceled:</label>
+  <select id="isCanceled7">
+    <option value="all">All</option>
+    <option value="0">Not Canceled</option>
+    <option value="1">Canceled</option>
+  </select>
+
+  <label for="mainCountry7">Main Countries:</label>
+  <select id="mainCountry7">
+    <option value="all">All</option>
+  </select>
+
+  <label for="groupCountry7">Group Country:</label>
+  <select id="groupCountry7">
+    <option value="all">All</option>
+  </select>
+
+  <label for="hotel7">Hotel Type:</label>
+  <select id="hotel7">
+    <option value="all">All</option>
+    <option value="City Hotel">City Hotel</option>
+    <option value="Resort Hotel">Resort Hotel</option>
+  </select>
+
+  <label for="tipo7">Tipo:</label>
+  <select id="tipo7">
+    <option value="all">All</option>
+    <option value="Ocio">Ocio</option>
+    <option value="Trabajo">Trabajo</option>
+  </select>
+</div>
+
+<svg id="violin-adr-country"></svg>
+
+<h2>Cancelaciones por país</h2>
+<p>Este gráfico muestra la proporción de reservas canceladas y no canceladas por país. El ancho de cada país representa su volumen total de reservas.</p>
+
+<div class="controls" id="controls-mosaic">
+  <label for="isCanceled9">Is Canceled:</label>
+  <select id="isCanceled9">
+    <option value="all">All</option>
+    <option value="0">No Canceladas</option>
+    <option value="1">Canceladas</option>
+  </select>
+
+  <label for="mainCountry9">Main Countries:</label>
+  <select id="mainCountry9">
+    <option value="all">All</option>
+  </select>
+
+  <label for="groupCountry9">Group Country:</label>
+  <select id="groupCountry9">
+    <option value="all">All</option>
+  </select>
+
+  <label for="hotel9">Hotel Type:</label>
+  <select id="hotel9">
+    <option value="all">All</option>
+    <option value="City Hotel">City Hotel</option>
+    <option value="Resort Hotel">Resort Hotel</option>
+  </select>
+
+  <label for="tipo9">Tipo:</label>
+  <select id="tipo9">
+    <option value="all">All</option>
+    <option value="Ocio">Ocio</option>
+    <option value="Trabajo">Trabajo</option>
+  </select>
+</div>
+
+<svg id="mosaic-cancellations"></svg>
+
+
+<h2>% de reservas por semana y país</h2>
+<p>Este gráfico muestra el porcentaje de reservas semanales en relación con el total de cada país. Puedes seleccionar un país específico o verlos todos simultáneamente.</p>
+
+<div class="controls" id="controls-country-share">
+  <label for="isCanceled8">Is Canceled:</label>
+  <select id="isCanceled8">
+    <option value="all">All</option>
+    <option value="0">Not Canceled</option>
+    <option value="1">Canceled</option>
+  </select>
+
+  <label for="mainCountry8">Main Country:</label>
+  <select id="mainCountry8">
+    <option value="all">All</option>
+  </select>
+
+  <label for="tipo8">Tipo:</label>
+  <select id="tipo8">
+    <option value="all">All</option>
+    <option value="Ocio">Ocio</option>
+    <option value="Trabajo">Trabajo</option>
+  </select>
+
+  <label for="hotel8">Hotel Type:</label>
+  <select id="hotel8">
+    <option value="all">All</option>
+    <option value="City Hotel">City Hotel</option>
+    <option value="Resort Hotel">Resort Hotel</option>
+  </select>
+</div>
+
+<svg id="country-weekly-share"></svg>
+
+
+<h2>parallel sets</h2>
+<p style="text-align: left;">Vemos como se distribuye los paises, entre hoteles y el proposito del viaje para cada hotel.</p>
+<div class="controls" id="controls-parallel">
+  <label for="isCanceled3">Is Canceled:</label>
+  <select id="isCanceled3">
+    <option value="all">All</option>
+    <option value="0">Not Canceled</option>
+    <option value="1">Canceled</option>
+  </select>
+</div>
+<svg id="parallel-sets"></svg>
+
+<h2>Distribución del Lead Time por país y tipo de viaje</h2>
+<p>Este gráfico muestra la distribución del tiempo de antelación con que se hacen las reservas (Lead Time), diferenciando por país y tipo de viaje. Se incluyen los percentiles, mediana y media para facilitar su interpretación.</p>
+
+<div class="controls" id="controls-violin-leadtime">
+  <label for="isCanceled10">Is Canceled:</label>
+  <select id="isCanceled10">
+    <option value="all">All</option>
+    <option value="0">No canceladas</option>
+    <option value="1">Canceladas</option>
+  </select>
+
+  <label for="mainCountry10">Main Countries:</label>
+  <select id="mainCountry10">
+    <option value="all">All</option>
+  </select>
+
+  <label for="groupCountry10">Group Country:</label>
+  <select id="groupCountry10">
+    <option value="all">All</option>
+  </select>
+
+  <label for="hotel10">Hotel Type:</label>
+  <select id="hotel10">
+    <option value="all">All</option>
+    <option value="City Hotel">City Hotel</option>
+    <option value="Resort Hotel">Resort Hotel</option>
+  </select>
+
+  <label for="tipo10">Tipo de viaje:</label>
+  <select id="tipo10">
+    <option value="all">All</option>
+  </select>
+</div>
+
+<svg id="violin-leadtime"></svg>
+
+
+  
+
+  <script src="script.js"></script>
+  <script src="script2.js"></script>
+  <script src="script3.js"></script>
+  <script src="script4.js"></script>
+  <script src="script5.js"></script>
+  <script src="script6.js"></script>
+  <script src="script7.js"></script>
+  <script src="script8.js"></script>
+  <script src="script9.js"></script>
+  <script src="script10.js"></script>
+
+
+
+
+
+
+</body>
+</html>
